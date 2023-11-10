@@ -1,4 +1,4 @@
-import utils from './utils'
+import utils, { randomColor, randomIntFromRange } from './utils'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -29,45 +29,76 @@ addEventListener('resize', () => {
   init()
 })
 
+addEventListener('click', () => {
+  init()
+})
+
 // Objects
 class Ball {
-  constructor(x, y, dy, radius, color) {
+  constructor({ x, y, dx, dy, radius, color }) {
     this.x = x
     this.y = y
+    this.dx = dx
     this.dy = dy;
-    this.radius = radius
+    this.radiusX = radius
+    this.radiusY = radius
     this.color = color
   }
 
   draw() {
     c.beginPath()
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+    //c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+    c.ellipse(this.x, this.y, this.radiusX, this.radiusY, 0, 0, 2 * Math.PI);
     c.fillStyle = this.color
     c.fill()
+    c.stroke()
     c.closePath()
   }
 
   update() {
-    if (this.y + this.radius > canvas.height) {
+    if (this.y + this.radiusY + this.dy > canvas.height) { // Hozzá kell adni a csorsulást is hogy ne ragadjanak hozzá a talajhoz.
       this.dy *= -1
       this.dy *= FRICTION
+      this.dx *= FRICTION
     } else {
       
       this.dy += GRAVITY;
     }
+
+    if (this.x + this.radiusX + this.dx > canvas.width) {
+      this.dx *= -1
+      this.dx *= FRICTION
+    }
+
+    if (this.x - this.radiusX<= 0) {
+      this.dx *= -1
+      this.dx *= FRICTION
+    }
+
+    this.x += this.dx
     this.y += this.dy
     this.draw()
   }
 }
 
 // Implementation
-var ball
+var ballArray = []
 
 function init() {
-  ball = new Ball(canvas.width / 2, canvas.height / 2, 2, 30, 'red')
   
-  for (let i = 0; i < 400; i++) {
-    // objects.push()
+  const radius = 30
+
+  ballArray = []
+
+  for (let i = 0; i < 10; i++) {
+    const ball = new Ball({
+      x: randomIntFromRange(radius, canvas.width - radius),
+      y: randomIntFromRange(canvas.height / 2 - 300, canvas.height / 2 + 100),
+      dx: randomIntFromRange(-10, 10),
+      dy: randomIntFromRange(-10, 10),
+      radius: radius,
+      color: randomColor(colors)})
+    ballArray.push(ball)
   }
 }
 
@@ -83,7 +114,9 @@ function animate() {
   //  object.update()
   // })
 
-  ball.update()
+  ballArray.forEach(ball => {
+      ball.update()
+  })
 
 }
 

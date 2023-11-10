@@ -133,46 +133,79 @@ addEventListener('resize', function () {
   canvas.height = innerHeight;
   init();
 });
+addEventListener('click', function () {
+  init();
+});
 
 // Objects
 var Ball = /*#__PURE__*/function () {
-  function Ball(x, y, dy, radius, color) {
+  function Ball(_ref) {
+    var x = _ref.x,
+      y = _ref.y,
+      dx = _ref.dx,
+      dy = _ref.dy,
+      radius = _ref.radius,
+      color = _ref.color;
     _classCallCheck(this, Ball);
     this.x = x;
     this.y = y;
+    this.dx = dx;
     this.dy = dy;
-    this.radius = radius;
+    this.radiusX = radius;
+    this.radiusY = radius;
     this.color = color;
   }
   _createClass(Ball, [{
     key: "draw",
     value: function draw() {
       c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      //c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+      c.ellipse(this.x, this.y, this.radiusX, this.radiusY, 0, 0, 2 * Math.PI);
       c.fillStyle = this.color;
       c.fill();
+      c.stroke();
       c.closePath();
     }
   }, {
     key: "update",
     value: function update() {
-      if (this.y + this.radius > canvas.height) {
+      if (this.y + this.radiusY + this.dy > canvas.height) {
+        // Hozzá kell adni a csorsulást is hogy ne ragadjanak hozzá a talajhoz.
         this.dy *= -1;
         this.dy *= FRICTION;
+        this.dx *= FRICTION;
       } else {
         this.dy += GRAVITY;
       }
+      if (this.x + this.radiusX + this.dx > canvas.width) {
+        this.dx *= -1;
+        this.dx *= FRICTION;
+      }
+      if (this.x - this.radiusX <= 0) {
+        this.dx *= -1;
+        this.dx *= FRICTION;
+      }
+      this.x += this.dx;
       this.y += this.dy;
       this.draw();
     }
   }]);
   return Ball;
 }(); // Implementation
-var ball;
+var ballArray = [];
 function init() {
-  ball = new Ball(canvas.width / 2, canvas.height / 2, 2, 30, 'red');
-  for (var i = 0; i < 400; i++) {
-    // objects.push()
+  var radius = 30;
+  ballArray = [];
+  for (var i = 0; i < 10; i++) {
+    var ball = new Ball({
+      x: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.randomIntFromRange)(radius, canvas.width - radius),
+      y: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.randomIntFromRange)(canvas.height / 2 - 300, canvas.height / 2 + 100),
+      dx: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.randomIntFromRange)(-10, 10),
+      dy: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.randomIntFromRange)(-10, 10),
+      radius: radius,
+      color: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.randomColor)(colors)
+    });
+    ballArray.push(ball);
   }
 }
 
@@ -187,7 +220,9 @@ function animate() {
   //  object.update()
   // })
 
-  ball.update();
+  ballArray.forEach(function (ball) {
+    ball.update();
+  });
 }
 init();
 animate();
