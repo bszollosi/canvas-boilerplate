@@ -120,6 +120,8 @@ var mouse = {
   y: innerHeight / 2
 };
 var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
+var GRAVITY = 1;
+var FRICTION = 0.88;
 
 // Event Listeners
 addEventListener('mousemove', function (event) {
@@ -134,10 +136,11 @@ addEventListener('resize', function () {
 
 // Objects
 var Ball = /*#__PURE__*/function () {
-  function Ball(x, y, radius, color) {
+  function Ball(x, y, dy, radius, color) {
     _classCallCheck(this, Ball);
     this.x = x;
     this.y = y;
+    this.dy = dy;
     this.radius = radius;
     this.color = color;
   }
@@ -153,14 +156,21 @@ var Ball = /*#__PURE__*/function () {
   }, {
     key: "update",
     value: function update() {
+      if (this.y + this.radius > canvas.height) {
+        this.dy *= -1;
+        this.dy *= FRICTION;
+      } else {
+        this.dy += GRAVITY;
+      }
+      this.y += this.dy;
       this.draw();
     }
   }]);
   return Ball;
 }(); // Implementation
-var objects;
+var ball;
 function init() {
-  objects = [];
+  ball = new Ball(canvas.width / 2, canvas.height / 2, 2, 30, 'red');
   for (var i = 0; i < 400; i++) {
     // objects.push()
   }
@@ -169,13 +179,16 @@ function init() {
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate);
+
+  // Clear the screen.
   c.clearRect(0, 0, canvas.width, canvas.height);
   c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y);
   // objects.forEach(object => {
   //  object.update()
   // })
-}
 
+  ball.update();
+}
 init();
 animate();
 })();
